@@ -1,6 +1,6 @@
 {
   "name": "Portrait Animator & Colorizer",
-  "description": "A high-end AI tool to bring your old photos to life. Colorize black and white portraits and animate them into cinematic videos using Gemini's advanced generative models.",
+  "description": "A high-end AI tool to bring your old photos to life. Colorize black and white portraits and animate them into cinematic videos using advanced AI creative engines.",
   "requestFramePermissions": [
     "camera"
   ]

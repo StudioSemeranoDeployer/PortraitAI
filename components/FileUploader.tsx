@@ -4,9 +4,10 @@ import React, { useRef } from 'react';
 interface FileUploaderProps {
   onUpload: (file: File) => void;
   isLoading: boolean;
+  label?: string;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isLoading }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isLoading, label = "Click to Upload Portrait" }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,8 +33,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isLoading }) => {
           <i className="fas fa-cloud-upload-alt text-2xl text-indigo-400"></i>
         </div>
         <div>
-          <h3 className="text-xl font-semibold mb-1">Click to Upload Portrait</h3>
-          <p className="text-slate-400 text-sm">Supports JPG, PNG, WEBP (Max 5MB)</p>
+          <h3 className="text-xl font-semibold mb-1">{label}</h3>
+          <p className="text-slate-400 text-sm">JPG, PNG, WEBP (Max 5MB)</p>
         </div>
       </div>
     </div>

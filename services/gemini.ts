@@ -3,7 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 
 // Standard colorization using 2.5 Flash Image
 export async function colorizePortrait(base64Image: string): Promise<string> {
-  // Use API key directly from environment as per guidelines
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   
   const response = await ai.models.generateContent({
@@ -33,15 +32,18 @@ export async function colorizePortrait(base64Image: string): Promise<string> {
 }
 
 // Portrait to Video Animation using Veo
-export async function animatePortrait(base64Image: string, onUpdate?: (msg: string) => void): Promise<string> {
-  // Always create a new GoogleGenAI instance right before the call to use the latest API key
+export async function animatePortrait(
+  base64Image: string, 
+  onUpdate?: (msg: string) => void,
+  orientation: '16:9' | '9:16' = '16:9'
+): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   
   onUpdate?.("Starting portrait animation engine...");
   
   let operation = await ai.models.generateVideos({
     model: 'veo-3.1-fast-generate-preview',
-    prompt: 'A cinematic portrait animation. The person in the photo blinks naturally, smiles slightly, and moves their head gently. Professional lighting, 4k, smooth motion.',
+    prompt: 'A high-end cinematic portrait animation. The person blinks naturally, moves their head subtly, and displays a very gentle, realistic facial expression. The lighting is cinematic and the background remains steady. 4k resolution feel, smooth temporal consistency.',
     image: {
       imageBytes: base64Image.split(',')[1],
       mimeType: 'image/png',
@@ -49,22 +51,31 @@ export async function animatePortrait(base64Image: string, onUpdate?: (msg: stri
     config: {
       numberOfVideos: 1,
       resolution: '720p',
-      aspectRatio: '16:9'
+      aspectRatio: orientation
     }
   });
 
   onUpdate?.("Synthesizing motion frames (this may take a minute)...");
 
+  let pollCount = 0;
   while (!operation.done) {
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    pollCount++;
+    await new Promise(resolve => setTimeout(resolve, pollCount > 5 ? 10000 : 5000));
     operation = await ai.operations.getVideosOperation({ operation: operation });
-    onUpdate?.("Still processing motion... hang tight!");
+    
+    // Rotate reassuring messages
+    if (pollCount % 3 === 0) {
+      onUpdate?.("Still processing motion... hang tight!");
+    } else if (pollCount % 3 === 1) {
+      onUpdate?.("Refining facial animations and temporal flow...");
+    } else {
+      onUpdate?.("Finalizing cinematic export...");
+    }
   }
 
   const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
   if (!downloadLink) throw new Error("Video generation failed: No URI found");
 
-  // Append API key when fetching from the download link as per guidelines
   const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
   const blob = await response.blob();
   return URL.createObjectURL(blob);
